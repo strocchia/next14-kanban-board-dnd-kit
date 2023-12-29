@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useContext } from "react";
 import { ColumnType, TaskType } from "@/types";
 import {
   DndContext,
@@ -18,11 +18,13 @@ import {
   arrayMove,
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
-import PlusIcon from "./icons/PlusIcon1";
 import Column from "./Column";
 import { createPortal } from "react-dom";
-import { generateID_v1, generateID_v2, generateID_v3 } from "@/lib/gen-ids";
+import { generateID_v2 } from "@/lib/gen-ids";
 import TaskCard from "./TaskCard";
+
+import { useTaskStore } from "@/lib/task-store";
+import { DragHelpers, DragProviderContext } from "@/lib/drag-helpers";
 
 type Props = {};
 
@@ -34,32 +36,30 @@ const defaultCols: ColumnType[] = [
 ];
 
 const defaultTasks: TaskType[] = [
-  { id: generateID_v1().toString(), columnId: "todo", content: "Do something" },
-  {
-    id: generateID_v1().toString(),
-    columnId: "todo",
-    content: "Do something else",
-  },
-  {
-    id: generateID_v1().toString(),
-    columnId: "todo",
-    content: "Analyze code architecture",
-  },
+  // { id: generateID_v2().toString(), columnId: "todo", content: "Do something" },
+  // {
+  //   id: generateID_v2().toString(),
+  //   columnId: "todo",
+  //   content: "Do something else",
+  // },
+  // {
+  //   id: generateID_v2().toString(),
+  //   columnId: "todo",
+  //   content: "Analyze code architecture",
+  // },
 ];
 
 export default function KanBoard({}: Props) {
   const [columns, setColumns] = useState<ColumnType[]>(defaultCols);
   const columnIds = columns?.map((col) => col.id);
 
-  const [tasks, setTasks] = useState<TaskType[]>(defaultTasks);
-
-  const [activeColumn, setActiveColumn] = useState<ColumnType | null>(null);
-  const [activeTask, setActiveTask] = useState<TaskType | null>(null);
+  // const [activeColumn, setActiveColumn] = useState<ColumnType | null>(null);
+  // const [activeTask, setActiveTask] = useState<TaskType | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 3, // 3px
+        distance: 10, // 10px
       },
     }),
     useSensor(KeyboardSensor, {
@@ -67,135 +67,20 @@ export default function KanBoard({}: Props) {
     }),
   );
 
-  //
-  // Drag functions
-  //
+  const tasks = useTaskStore((state) => state.tasks);
+  const activeTask = useTaskStore((state) => state.activeTask);
+  const activeColumn = useTaskStore((state) => state.activeColumn);
+  const createTask = useTaskStore((state) => state.createTask);
+  const updateTask = useTaskStore((state) => state.updateTask);
+  const deleteTask = useTaskStore((state) => state.deleteTask);
 
-  const onDragStart = (start_evt: DragStartEvent) => {
-    // console.log("Drag start", start_evt);
+  const { onDragStart, onDragOver, onDragEnd } =
+    useContext(DragProviderContext);
 
-    const active_data = start_evt.active.data.current;
-
-    if (!active_data) return;
-
-    // const active_id = start_evt.active.id as string;
-    // if (
-    //   active_id === "todo" ||
-    //   active_id === "progress" ||
-    //   active_id === "done"
-    // )
-
-    if (active_data.type === "Column") {
-      setActiveColumn(active_data.column);
-      return;
-    }
-
-    if (active_data.type === "Task") {
-      setActiveTask(active_data.task);
-      return;
-    }
-  };
-
-  const onDragEnd = (end_evt: DragEndEvent) => {
-    // console.log("Drag end event fired", end_evt);
-    setActiveColumn(null);
-    setActiveTask(null);
-    console.log("Set active column and task to null");
-
-    // if (!end_evt.over) return;
-    // const activeColumnId = end_evt.active.id;
-    // const overColumnId = end_evt.over.id;
-    // if (activeColumnId === overColumnId) return;
-  };
-
-  const onDragOver = (over_evt: DragOverEvent) => {
-    // console.log(over_evt);
-
-    if (!over_evt.over) return;
-
-    const activeId = over_evt.active.id;
-    const overId = over_evt.over.id;
-
-    if (activeId === overId) return;
-
-    // dragging task over task
-    if (
-      over_evt.active.data.current?.type === "Task" &&
-      over_evt.over.data.current?.type === "Task"
-    ) {
-      setTasks((tasks) => {
-        const activeIndex = tasks.findIndex((tsk) => tsk.id === activeId);
-        const overIndex = tasks.findIndex((tsk) => tsk.id === overId);
-
-        console.log(tasks[activeIndex], tasks[overIndex]);
-
-        tasks[activeIndex].columnId = tasks[overIndex].columnId;
-
-        return arrayMove(tasks, activeIndex, overIndex);
-      });
-    }
-
-    // dragging task over column (i.e. empty space where no task exists)
-    if (
-      over_evt.active.data.current?.type === "Task" &&
-      over_evt.over.data.current?.type === "Column"
-    ) {
-      setTasks((tasks) => {
-        const activeIndex = tasks.findIndex((tsk) => tsk.id === activeId);
-
-        tasks[activeIndex].columnId = overId;
-
-        console.log("Task over Column", { activeIndex });
-
-        return arrayMove(tasks, activeIndex, activeIndex);
-      });
-    }
-  };
-
-  //
-  // Task helper functions
-  //
-
-  const createTask = (columnId: string | number) => {
-    const newTask: TaskType = {
-      //   id: generateID_v3(),
-      id: generateID_v1(),
-      columnId: columnId,
-      content: `Task ${tasks.length + 1}`,
-    };
-
-    // append task
-    setTasks([
-      ...tasks,
-      {
-        id: generateID_v1(),
-        columnId: columnId,
-        content: `Task ${tasks.length + 1}`,
-      },
-    ]);
-
-    // // prepend task
-    // setTasks([
-    //   {
-    //     id: generateID_v3(),
-    //     columnId: columnId,
-    //     content: `Task ${tasks.length + 1}`,
-    //   },
-    //   ...tasks,
-    // ]);
-  };
-
-  const updateTask = (taskId: string | number, content: string) => {
-    const newTasks = tasks.map((task) =>
-      task.id !== taskId ? { ...task } : { ...task, content },
-    );
-
-    setTasks(newTasks);
-  };
-
-  const deleteTask = (taskId: string | number) => {
-    setTasks((tasks) => tasks.filter((task) => task.id !== taskId));
-  };
+  useEffect(() => {
+    // manually rehydrate
+    useTaskStore.persist.rehydrate();
+  }, []);
 
   return (
     <div className="m-auto flex min-h-screen w-full items-center overflow-y-hidden overflow-x-scroll px-10">

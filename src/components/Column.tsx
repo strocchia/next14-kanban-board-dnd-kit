@@ -56,7 +56,7 @@ export default function Column({
     <div
       ref={setNodeRef}
       style={style}
-      className="flex h-[500px] max-h-[500px] w-[350px] flex-col rounded-md bg-colBgColor"
+      className="my-auto flex h-[80vh] max-h-screen w-[22vw] flex-col rounded-md bg-colBgColor"
     >
       {/* Column title */}
       <div
