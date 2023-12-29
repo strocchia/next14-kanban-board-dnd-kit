@@ -1,5 +1,9 @@
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
+## Acknowledgements
+
+Kudos to https://github.com/Kliton/react-kanban-board-dnd-kit-tutorial-yt.git and affiliated Youtube video tutorial for inspiration.
+
 ## Getting Started
 
 First, run the development server:

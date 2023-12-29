@@ -25,3 +25,25 @@ body {
     )
     rgb(var(--background-start-rgb));
 }
+
+html,
+body,
+#root {
+  @apply box-border bg-black text-white;
+}
+
+::-webkit-scrollbar {
+  width: 0.25rem;
+}
+
+::-webkit-scrollbar:horizontal {
+  height: 0.5rem;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply rounded-sm bg-rose-900;
+}
+
+.task > ::-webkit-scrollbar-thumb {
+  @apply rounded-sm bg-sky-600;
+}
