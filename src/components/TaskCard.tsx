@@ -1,13 +1,16 @@
-import { TaskType } from "@/types";
 import { useSortable } from "@dnd-kit/sortable";
 import React, { useState } from "react";
 import { TrashIcon } from "./icons/TrashIcon";
 import { CSS } from "@dnd-kit/utilities";
+import { TaskProps } from "@/lib/task-context";
+import { Id } from "../../convex/_generated/dataModel";
 
 type Props = {
-  task: TaskType;
-  updateTask: (taskId: string | number, content: string) => void;
-  deleteTask: (taskId: string | number) => void;
+  task: TaskProps;
+  // updateTask: (taskId: string | number, content: string) => void;
+  // deleteTask: (taskId: string | number) => void;
+  updateTask: (taskId: Id<"dnd_tasks">, content: string) => void;
+  deleteTask: (taskId: Id<"dnd_tasks">) => void;
 };
 
 export default function TaskCard({ task, updateTask, deleteTask }: Props) {
@@ -22,7 +25,7 @@ export default function TaskCard({ task, updateTask, deleteTask }: Props) {
     transition,
     isDragging,
   } = useSortable({
-    id: task.id,
+    id: task._id,
     data: { type: "Task", task },
     disabled: isEditMode,
   });
@@ -61,7 +64,7 @@ export default function TaskCard({ task, updateTask, deleteTask }: Props) {
           value={task.content}
           autoFocus
           placeholder="Task content here"
-          onChange={(e) => updateTask(task.id, e.target.value)}
+          onChange={(e) => updateTask(task._id, e.target.value)}
           onBlur={toggleEditMode}
           onKeyDown={(e) => {
             if (e.key === "Enter" && e.shiftKey) toggleEditMode();
@@ -82,7 +85,9 @@ export default function TaskCard({ task, updateTask, deleteTask }: Props) {
       onMouseLeave={() => setMouseOver(false)}
       onClick={() => toggleEditMode()}
     >
-      <span className="mb-2 text-xs text-gray-400">#{task.id}</span>
+      <span className="mb-3 text-xs text-gray-400">
+        #{task._id.slice(0, 7)}
+      </span>
       <p className="my-auto h-5/6 w-full overflow-auto whitespace-pre-wrap">
         {task.content}
       </p>
@@ -90,7 +95,7 @@ export default function TaskCard({ task, updateTask, deleteTask }: Props) {
       {mouseOver && (
         <button
           className="absolute right-4 rounded bg-colBgColor stroke-white p-2 opacity-60 hover:opacity-100"
-          onClick={() => deleteTask(task.id)}
+          onClick={() => deleteTask(task._id)}
         >
           <TrashIcon />
         </button>

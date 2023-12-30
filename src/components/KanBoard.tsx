@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useMemo, useEffect, useContext } from "react";
-import { ColumnType, TaskType } from "@/types";
 import {
   DndContext,
   DragEndEvent,
@@ -25,17 +24,18 @@ import TaskCard from "./TaskCard";
 
 import { useTaskStore } from "@/lib/task-store";
 import { DragHelpers, DragProviderContext } from "@/lib/drag-helpers";
+import { ColumnProps, TaskProps, useTaskContext } from "@/lib/task-context";
 
 type Props = {};
 
-const defaultCols: ColumnType[] = [
+const defaultCols: ColumnProps[] = [
   { id: "todo", title: "Todo" },
   { id: "progress", title: "WIP" },
   { id: "done", title: "Done" },
   { id: "backlog", title: "Backlog" },
 ];
 
-const defaultTasks: TaskType[] = [
+const defaultTasks: TaskProps[] = [
   // { id: generateID_v2().toString(), columnId: "todo", content: "Do something" },
   // {
   //   id: generateID_v2().toString(),
@@ -50,11 +50,8 @@ const defaultTasks: TaskType[] = [
 ];
 
 export default function KanBoard({}: Props) {
-  const [columns, setColumns] = useState<ColumnType[]>(defaultCols);
+  const [columns, setColumns] = useState<ColumnProps[]>(defaultCols);
   const columnIds = columns?.map((col) => col.id);
-
-  // const [activeColumn, setActiveColumn] = useState<ColumnType | null>(null);
-  // const [activeTask, setActiveTask] = useState<TaskType | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -67,20 +64,30 @@ export default function KanBoard({}: Props) {
     }),
   );
 
-  const tasks = useTaskStore((state) => state.tasks);
-  const activeTask = useTaskStore((state) => state.activeTask);
-  const activeColumn = useTaskStore((state) => state.activeColumn);
-  const createTask = useTaskStore((state) => state.createTask);
-  const updateTask = useTaskStore((state) => state.updateTask);
-  const deleteTask = useTaskStore((state) => state.deleteTask);
+  // const tasks = useTaskStore((state) => state.tasks);
+  // const activeTask = useTaskStore((state) => state.activeTask);
+  // const activeColumn = useTaskStore((state) => state.activeColumn);
+  // const createTask = useTaskStore((state) => state.createTask);
+  // const updateTask = useTaskStore((state) => state.updateTask);
+  // const deleteTask = useTaskStore((state) => state.deleteTask);
 
-  const { onDragStart, onDragOver, onDragEnd } =
-    useContext(DragProviderContext);
+  // useEffect(() => {
+  //   // manually rehydrate
+  //   useTaskStore.persist.rehydrate();
+  // }, []);
 
-  useEffect(() => {
-    // manually rehydrate
-    useTaskStore.persist.rehydrate();
-  }, []);
+  const {
+    tasks,
+    setTasks,
+    activeTask,
+    activeColumn,
+    createTask,
+    updateTask,
+    deleteTask,
+    onDragStart,
+    onDragEnd,
+    onDragOver,
+  } = useTaskContext();
 
   return (
     <div className="m-auto flex min-h-screen w-full items-center overflow-y-hidden overflow-x-scroll px-10">

@@ -23,32 +23,32 @@ export const useTaskStore = create<TaskState>()(
       activeTask: null,
       setActiveColumn: (activeColumn) => set({ activeColumn }),
       setActiveTask: (activeTask) => set({ activeTask }),
-      createTask: (columnId) => {
-        // append task to tasks array end
-        set((state) => ({
-          tasks: [
-            ...state.tasks,
-            {
-              id: generateID_v1(),
-              columnId: columnId,
-              content: `Task ${state.tasks.length + 1}`,
-            },
-          ],
-        }));
-      },
-      updateTask: (taskId, content) => {
-        set((state) => ({
-          tasks: state.tasks.map((task) =>
-            task.id === taskId ? { ...task, content } : { ...task },
-          ),
-        }));
-      },
-      deleteTask: (taskId) => {
-        set((state) => ({
-          tasks: state.tasks.filter((task) => task.id !== taskId),
-        }));
-      },
-      reorderTasks: (tasks) => set({ tasks: tasks }),
+      // createTask: (columnId) => {
+      //   // append task to tasks array end
+      //   set((state) => ({
+      //     tasks: [
+      //       ...state.tasks,
+      //       {
+      //         id: generateID_v1(),
+      //         columnId: columnId,
+      //         content: `Task ${state.tasks.length + 1}`,
+      //       },
+      //     ],
+      //   }));
+      // },
+      // updateTask: (taskId, content) => {
+      //   set((state) => ({
+      //     tasks: state.tasks.map((task) =>
+      //       task.id === taskId ? { ...task, content } : { ...task },
+      //     ),
+      //   }));
+      // },
+      // deleteTask: (taskId) => {
+      //   set((state) => ({
+      //     tasks: state.tasks.filter((task) => task.id !== taskId),
+      //   }));
+      // },
+      // reorderTasks: (tasks) => set({ tasks: tasks }),
     }),
 
     { name: "kanban-store", skipHydration: true },

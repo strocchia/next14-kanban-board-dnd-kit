@@ -1,16 +1,19 @@
-import { ColumnType, TaskType } from "@/types";
+import React, { useState } from "react";
 import { useSortable, SortableContext } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import React, { useState } from "react";
 import PlusIcon from "./icons/PlusIcon1";
 import TaskCard from "./TaskCard";
+import { Id } from "../../convex/_generated/dataModel";
+import { ColumnProps, TaskProps } from "@/lib/task-context";
 
 type Props = {
-  column: ColumnType;
-  tasks: TaskType[];
+  column: ColumnProps;
+  tasks: TaskProps[];
   createTask: (columnId: string | number) => void;
-  updateTask: (taskId: string | number, content: string) => void;
-  deleteTask: (taskId: string | number) => void;
+  // updateTask: (taskId: string | number, content: string) => void;
+  // deleteTask: (taskId: string | number) => void;
+  updateTask: (taskId: Id<"dnd_tasks">, content: string) => void;
+  deleteTask: (taskId: Id<"dnd_tasks">) => void;
 };
 
 export default function Column({
@@ -22,7 +25,7 @@ export default function Column({
 }: Props) {
   const [isEditMode, setEditMode] = useState(false);
 
-  const taskIds = tasks?.map((task) => task.id);
+  const taskIds = tasks?.map((task) => task._id);
 
   const {
     attributes,
@@ -72,7 +75,7 @@ export default function Column({
         <SortableContext items={taskIds}>
           {tasks.map((task, idx) => (
             <TaskCard
-              key={task.id || idx}
+              key={task._id || idx}
               task={task}
               updateTask={updateTask}
               deleteTask={deleteTask}
